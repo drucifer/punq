@@ -3,7 +3,7 @@
 #include <string.h>
 #include <glib.h>
 
-void count_lines(char *file, GData **count)
+void count_lines(char *file, GHashTable *count)
 {
 	gchar *line;
 	gsize len, term;
@@ -12,35 +12,32 @@ void count_lines(char *file, GData **count)
 		g_io_channel_unix_new(fileno(stdin)) :
 		g_io_channel_new_file(file, "r", &err);
 	while (G_IO_STATUS_NORMAL == g_io_channel_read_line (io, &line, &len, &term, &err)) {
-		GQuark q = g_quark_from_string(line);
-		g_free(line);
-		gpointer c = g_datalist_id_get_data(count, q);
-		if (c == NULL) {
+		int *c = g_hash_table_lookup(count, line);
+		if (!c) {
 			c = g_malloc(sizeof(int));
-			*(int *)c = 0;
-			g_datalist_id_set_data(count, q, c);
+			*c = 0;
+			g_hash_table_insert(count, g_strdup(line), c);
 		}
-		(*(int *)c)++;
+		(*c)++;
 	}
 }
 
-void print_fn(GQuark q, gpointer c, gpointer ignored) {
-	printf("%7d %s", *(int *)c, g_quark_to_string(q));
+void print_fn(gpointer key, gpointer value, gpointer ignored) {
+	printf("%7d %s", *(int *)value, key);
 }
 
-void print_counts(GData **count) {
-	g_datalist_foreach(count, print_fn, NULL);
+void print_counts(GHashTable *count) {
+	g_hash_table_foreach(count, print_fn, NULL);
 }
 
 int main (int argc, char *argv[]) {
-	GData *counts;
-	g_datalist_init(&counts);
+	GHashTable *counts = g_hash_table_new(g_str_hash, (GEqualFunc)g_str_equal);
 	for (int i = 1; i < argc; i++) {
-		count_lines(argv[i], &counts);
+		count_lines(argv[i], counts);
 	}
 	if (argc == 1) {
-		count_lines("-", &counts);
+		count_lines("-", counts);
 	}
 
-	print_counts(&counts);
+	print_counts(counts);
 }
