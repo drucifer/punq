@@ -1,7 +1,6 @@
 #define _POSIX_SOURCE
-#include <stdio.h>
-#include <string.h>
 #include <glib.h>
+#include <glib/gprintf.h>
 
 static struct {
 	gboolean count;
@@ -22,7 +21,7 @@ void count_lines(char *file, GHashTable *count) {
 	gchar *line;
 	gsize len, term;
 	GError *err = NULL;
-	GIOChannel *io = strcmp(file, "-") == 0 ?
+	GIOChannel *io = g_str_equal(file, "-") ?
 		g_io_channel_unix_new(fileno(stdin)) :
 		g_io_channel_new_file(file, "r", &err);
 	while (G_IO_STATUS_NORMAL == g_io_channel_read_line(io, &line, &len, &term, &err)) {
@@ -37,7 +36,7 @@ void count_lines(char *file, GHashTable *count) {
 }
 
 void print_fn(gpointer key, gpointer value, gpointer format) {
-	printf(format, *(int *)value, key);
+	g_printf(format, *(int *)value, key);
 }
 
 void print_counts(GHashTable *count) {
