@@ -70,7 +70,7 @@ int main (int argc, char *argv[]) {
 		return 1;
 	}
 
-	GHashTable *counts = g_hash_table_new(g_str_hash, (GEqualFunc)g_str_equal);
+	GHashTable *counts = g_hash_table_new(g_str_hash, g_str_equal);
 	for (int i = 1; i < argc; i++) {
 		count_lines(argv[i], counts);
 	}
