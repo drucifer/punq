@@ -36,7 +36,7 @@ void count_lines(char *file, GHashTable *count) {
 }
 
 void print_fn(gpointer key, gpointer value, gpointer format) {
-	g_printf(format, *(int *)value, key);
+	printf(format, *(int *)value, key);
 }
 
 void print_counts(GHashTable *count) {
