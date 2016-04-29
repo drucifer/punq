@@ -18,15 +18,14 @@ static GOptionEntry goptions[] = {
 	{ NULL }
 };
 
-void count_lines(char *file, GHashTable *count)
-{
+void count_lines(char *file, GHashTable *count) {
 	gchar *line;
 	gsize len, term;
 	GError *err = NULL;
 	GIOChannel *io = strcmp(file, "-") == 0 ?
 		g_io_channel_unix_new(fileno(stdin)) :
 		g_io_channel_new_file(file, "r", &err);
-	while (G_IO_STATUS_NORMAL == g_io_channel_read_line (io, &line, &len, &term, &err)) {
+	while (G_IO_STATUS_NORMAL == g_io_channel_read_line(io, &line, &len, &term, &err)) {
 		int *c = g_hash_table_lookup(count, line);
 		if (!c) {
 			c = g_malloc(sizeof(int));
@@ -57,7 +56,7 @@ void print_counts(GHashTable *count) {
 	g_hash_table_foreach(count, print_fn, format);
 }
 
-int main (int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 	GError *error = NULL;
 	GOptionContext *context;
 
