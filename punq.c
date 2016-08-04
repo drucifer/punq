@@ -11,6 +11,7 @@ static struct {
 
 static GOptionEntry goptions[] = {
 	{ "count", 'c', 0, G_OPTION_ARG_NONE, &Punq_options.count, "Count occurrences of each line", NULL },
+	{ "after", 'a', 0, G_OPTION_ARG_NONE, &Punq_options.after, "Place count after text when using tabs or commas", NULL },
 	{ "comma", ',', 0, G_OPTION_ARG_NONE, &Punq_options.comma, "Use comma to separate count from text", NULL },
 	{ "tab",   't', 0, G_OPTION_ARG_NONE, &Punq_options.tab,   "Use tab to separate count from text", NULL },
 
@@ -36,21 +37,21 @@ void count_lines(char *file, GHashTable *count) {
 }
 
 void print_fn(gpointer key, gpointer value, gpointer format) {
-	printf(format, *(int *)value, key);
+	printf(format, *(int *)value, g_strdelimit(key, "\r\n", '\0'));
 }
 
 void print_counts(GHashTable *count) {
 	char *format;
 	if (Punq_options.count) {
-		if (Punq_options.comma) { 
-			format = "%d,%s";
+		if (Punq_options.comma) {
+			format = Punq_options.after ? "%2$s,%1$d\n" : "%d,%s\n";
 		} else if (Punq_options.tab) {
-			format = "%d\t%s";
+			format = Punq_options.after ? "%2$s\t%1$d\n" : "%d\t%s\n";
 		} else {
-			format = "%7d %s";
+			format = "%7d %s\n";
 		}
 	} else {
-		format = "%2$s";
+		format = "%2$s\n";
 	}
 	g_hash_table_foreach(count, print_fn, format);
 }
